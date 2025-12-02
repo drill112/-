@@ -1,0 +1,26 @@
+﻿<h2>Гостевая книга</h2>
+
+<a href="/Account/Login">Вход в систему</a> |
+<a href="/Account/Registration">Регистрация</a>
+
+<br>
+<br>
+
+@if (Context.Session.GetString("UserId") != null)
+{
+    <form method="post" action="/Home/AddMessage">
+        <textarea name="message" rows="4" cols="50"></textarea><br>
+        <button type="submit">Добавить сообщение</button>
+        <a href="/Home/Logout">Выход</a>
+    </form>
+}
+
+@foreach (var m in Model)
+{
+    <table border="1" style="margin-top: 10px;">
+        <tr><td><b>Пользователь:</b> @m.Id_User</td></tr>
+        <tr><td>@m.Message</td></tr>
+        <tr><td>@m.MessageDate</td></tr>
+    </table>
+}
+
