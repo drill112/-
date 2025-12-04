@@ -2,11 +2,11 @@
 
 public class AccountController : Controller
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IRepository _repo;
 
-    public AccountController(ApplicationDbContext db)
+    public AccountController(IRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
     public IActionResult Login()
@@ -17,8 +17,7 @@ public class AccountController : Controller
     [HttpPost]
     public IActionResult Login(string login, string password)
     {
-        var user = _db.Users
-            .FirstOrDefault(u => u.Name == login && u.Pwd == password);
+        var user = _repo.GetUser(login, password);
 
         if (user != null)
         {
@@ -28,12 +27,6 @@ public class AccountController : Controller
 
         ViewBag.Error = "Неверный логин или пароль";
         return View();
-    }
-
-    public IActionResult Guest()
-    {
-        HttpContext.Session.Clear();
-        return RedirectToAction("Index", "Home");
     }
 
     public IActionResult Registration()
@@ -50,10 +43,22 @@ public class AccountController : Controller
             return View();
         }
 
-        _db.Users.Add(new User { Name = login, Pwd = password });
-        _db.SaveChanges();
+        _repo.AddUser(new User
+        {
+            Name = login,
+            Pwd = password
+        });
+
+        _repo.Save();
 
         return RedirectToAction("Login");
     }
+
+    public IActionResult Guest()
+    {
+        HttpContext.Session.Clear();
+        return RedirectToAction("Index", "Home");
+    }
 }
+
 

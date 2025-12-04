@@ -1,38 +1,36 @@
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 public class HomeController : Controller
 {
-    private readonly ApplicationDbContext _db;
+    private readonly IRepository _repo;
 
-    public HomeController(ApplicationDbContext db)
+    public HomeController(IRepository repo)
     {
-        _db = db;
+        _repo = repo;
     }
 
     public IActionResult Index()
     {
-        var messages = _db.Messages
-            .OrderByDescending(m => m.MessageDate)
-            .ToList();
-
+        var messages = _repo.GetMessages();
         return View(messages);
     }
 
     [HttpPost]
     public IActionResult AddMessage(string message)
     {
-        if (HttpContext.Session.GetString("UserId") == null)
+        var userId = HttpContext.Session.GetString("UserId");
+
+        if (userId == null)
             return RedirectToAction("Login", "Account");
 
-        _db.Messages.Add(new GuestMessage
+        _repo.AddMessage(new GuestMessage
         {
-            Id_User = int.Parse(HttpContext.Session.GetString("UserId")),
+            Id_User = int.Parse(userId),
             Message = message,
             MessageDate = DateTime.Now
         });
 
-        _db.SaveChanges();
+        _repo.Save();
 
         return RedirectToAction("Index");
     }
@@ -43,5 +41,6 @@ public class HomeController : Controller
         return RedirectToAction("Index");
     }
 }
+
 
 
