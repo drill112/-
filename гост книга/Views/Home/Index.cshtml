@@ -1,26 +1,54 @@
-﻿<h2>Гостевая книга</h2>
+﻿<div class="container mt-4">
+    <h2 class="mb-4">Гостевая книга (SPA)</h2>
 
-<a href="/Account/Login">Вход в систему</a> |
-<a href="/Account/Registration">Регистрация</a>
+    @if (Context.Session.GetString("UserId") != null)
+    {
+        <div class="mb-3">
+            <textarea id="messageInput" class="form-control" rows="3" placeholder="Введите сообщение..."></textarea>
+        </div>
 
-<br>
-<br>
+        <button id="sendBtn" class="btn btn-primary mb-4">Добавить</button>
+    }
 
-@if (Context.Session.GetString("UserId") != null)
-{
-    <form method="post" action="/Home/AddMessage">
-        <textarea name="message" rows="4" cols="50"></textarea><br>
-        <button type="submit">Добавить сообщение</button>
-        <a href="/Home/Logout">Выход</a>
-    </form>
-}
+    <div id="messages"></div>
+</div>
 
-@foreach (var m in Model)
-{
-    <table border="1" style="margin-top: 10px;">
-        <tr><td><b>Пользователь:</b> @m.Id_User</td></tr>
-        <tr><td>@m.Message</td></tr>
-        <tr><td>@m.MessageDate</td></tr>
-    </table>
-}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 
+<script>
+    function loadMessages() {
+        $.get("/Home/GetMessagesAjax", function (data) {
+            let html = "";
+            data.forEach(m => {
+                html += `
+                    <div class="card mb-3 shadow-sm">
+                        <div class="card-body">
+                            <h6 class="text-muted">Пользователь: ${m.userId} — ${m.date}</h6>
+                            <p>${m.text}</p>
+                        </div>
+                    </div>`;
+            });
+
+            $("#messages").html(html);
+        });
+    }
+
+    $("#sendBtn").click(function () {
+        const text = $("#messageInput").val();
+
+        if (text.trim() === "") return;
+
+        $.post("/Home/AddMessageAjax", { message: text }, function (response) {
+            if (response.success) {
+                $("#messageInput").val("");
+                loadMessages();
+            } else {
+                alert(response.error);
+            }
+        });
+    });
+
+    $(document).ready(function () {
+        loadMessages();
+    });
+</script>

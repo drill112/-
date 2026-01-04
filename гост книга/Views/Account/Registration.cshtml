@@ -1,12 +1,37 @@
-﻿<h2>Регистрация</h2>
+﻿@{
+    ViewData["Title"] = "Регистрация";
+}
 
-<form method="post">
-    Логин: <input name="login"><br>
-    Пароль: <input type="password" name="password"><br>
-    Подтвердите пароль: <input type="password" name="confirm"><br><br>
+<div class="container mt-5">
+    <div class="col-md-4 mx-auto">
+        <h2 class="text-center mb-4">Регистрация</h2>
 
-    <button type="submit">Зарегистрироваться</button>
-</form>
+        <form method="post">
 
-<p style="color:red">@ViewBag.Error</p>
+            <div class="mb-3">
+                <label class="form-label">Логин</label>
+                <input class="form-control" name="login" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Пароль</label>
+                <input class="form-control" type="password" name="password" />
+            </div>
+
+            <div class="mb-3">
+                <label class="form-label">Подтвердите пароль</label>
+                <input class="form-control" type="password" name="confirm" />
+                @if (ViewBag.Error != null)
+                {
+                    <p class="text-danger">@ViewBag.Error</p>
+                }
+            </div>
+
+            <button class="btn btn-primary w-100">Зарегистрироваться</button>
+        </form>
+    </div>
+</div>
+
+}
+
 

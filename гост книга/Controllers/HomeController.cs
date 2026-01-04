@@ -40,6 +40,42 @@ public class HomeController : Controller
         HttpContext.Session.Clear();
         return RedirectToAction("Index");
     }
+
+    [HttpGet]
+    public IActionResult GetMessagesAjax()
+    {
+        var list = _repo.GetMessages()
+            .Select(m => new {
+                id = m.Id,
+                userId = m.Id_User,
+                text = m.Message,
+                date = m.MessageDate.ToString("dd.MM.yyyy HH:mm:ss")
+            });
+
+        return Json(list);
+    }
+
+    [HttpPost]
+    public IActionResult AddMessageAjax(string message)
+    {
+        var userId = HttpContext.Session.GetString("UserId");
+
+        if (userId == null)
+            return Json(new { success = false, error = "Пользователь не авторизован" });
+
+        var msg = new GuestMessage
+        {
+            Message = message,
+            MessageDate = DateTime.Now,
+            Id_User = int.Parse(userId)
+        };
+
+        _repo.AddMessage(msg);
+        _repo.Save();
+
+        return Json(new { success = true });
+    }
+
 }
 
 
